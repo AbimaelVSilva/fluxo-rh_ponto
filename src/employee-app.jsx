@@ -1,6 +1,9 @@
 // employee-app.jsx — Mobile app inside iOS frame
 import React from 'react';
 import { IOSDevice } from './ios-frame.jsx';
+import fluxoLogo from '../assets/fluxorh-logo.png';
+import fluxoMark from '../assets/fluxorh-mark.png';
+import fluxoMarkDark from '../assets/fluxorh-mark-dark.png';
 
 // ── shared mock data ─────────────────────────────────────────
 const EMP_DATA = {
@@ -86,7 +89,7 @@ function EmployeeLoginScreen({ onLogin }) {
     }}>
       <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', flex: 1 }}>
         <div style={{ textAlign: 'center', marginBottom: 42 }}>
-          <img src="assets/fluxorh-logo.png" alt="FluxoRH" style={{
+          <img src={fluxoLogo} alt="FluxoRH" style={{
             height: 60, width: 'auto', display: 'block', margin: '0 auto 18px',
           }}/>
           <div style={{
@@ -345,7 +348,7 @@ function EmployeeHomeScreen({ onOpenHistory, onLogout, batidas, nextAction, onPu
         boxShadow: '0 4px 24px rgba(0,123,164,0.08), 0 1px 2px rgba(0,0,0,0.04)',
       }}>
         {/* faint brand mark */}
-        <img src="assets/fluxorh-mark.png" alt="" style={{
+        <img src={fluxoMark} alt="" style={{
           position: 'absolute', right: -40, top: -20, width: 160, opacity: 0.05, pointerEvents: 'none',
         }}/>
         <div style={{
@@ -788,7 +791,7 @@ function EmployeeProfileScreen({ onLogout }) {
         zIndex: 0, overflow: 'hidden',
       }}>
         {/* watermark */}
-        <img src="assets/fluxorh-mark-dark.png" alt="" style={{
+        <img src={fluxoMarkDark} alt="" style={{
           position: 'absolute', right: -60, top: 30, width: 220, opacity: 0.15, pointerEvents: 'none',
         }}/>
         <div style={{

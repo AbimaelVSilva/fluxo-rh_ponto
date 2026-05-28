@@ -1,5 +1,7 @@
 // manager-dashboard.jsx — Fluxo-RH web panel (HR view): Espelho de Ponto Mensal
 import React from 'react';
+import fluxoMark from '../assets/fluxorh-mark.png';
+import fluxoMarkDark from '../assets/fluxorh-mark-dark.png';
 
 // ── Mock data ───────────────────────────────────────────────
 const MONTH_NAME = 'Junho';
@@ -141,7 +143,7 @@ function Sidebar({ collapsed }) {
       overflow: 'hidden',
     }}>
       {/* Watermark mark inside sidebar */}
-      <img src="assets/fluxorh-mark-dark.png" alt="" style={{
+      <img src={fluxoMarkDark} alt="" style={{
         position: 'absolute', right: -60, bottom: 60, width: 220, opacity: 0.06, pointerEvents: 'none',
       }}/>
 
@@ -152,10 +154,10 @@ function Sidebar({ collapsed }) {
         borderBottom: '1px solid rgba(255,255,255,0.08)', position: 'relative', zIndex: 1,
       }}>
         {collapsed ? (
-          <img src="assets/fluxorh-mark.png" alt="FluxoRH" style={{ width: 32, height: 'auto', filter: 'brightness(0) invert(1)' }}/>
+          <img src={fluxoMark} alt="FluxoRH" style={{ width: 32, height: 'auto', filter: 'brightness(0) invert(1)' }}/>
         ) : (
           <React.Fragment>
-            <img src="assets/fluxorh-mark.png" alt="" style={{ width: 32, height: 'auto', filter: 'brightness(0) invert(1)', flexShrink: 0 }}/>
+            <img src={fluxoMark} alt="" style={{ width: 32, height: 'auto', filter: 'brightness(0) invert(1)', flexShrink: 0 }}/>
             <div>
               <div style={{
                 color: '#fff', fontWeight: 700, fontSize: 17, letterSpacing: 1,
