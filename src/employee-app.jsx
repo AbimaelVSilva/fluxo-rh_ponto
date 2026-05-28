@@ -856,7 +856,7 @@ function FaceRecognitionModal({ open, onSuccess, onCancel }) {
 
   React.useEffect(() => {
     if (phase === 'success') {
-      const t = setTimeout(() => { reset(); onSuccess(); }, 1600);
+      const t = setTimeout(() => { reset(); onSuccess(); }, 3000);
       return () => clearTimeout(t);
     }
   }, [phase, onSuccess]);
