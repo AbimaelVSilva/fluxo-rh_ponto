@@ -1,5 +1,6 @@
 // employee-app.jsx — Mobile app inside iOS frame
 import React from 'react';
+import Tesseract from 'tesseract.js';
 import { IOSDevice } from './ios-frame.jsx';
 import fluxoLogo from '../assets/fluxorh-logo.png';
 import fluxoMark from '../assets/fluxorh-mark.png';
@@ -9,8 +10,8 @@ import fluxoMarkDark from '../assets/fluxorh-mark-dark.png';
 const EMP_DATA = {
   name: 'João Silva',
   firstName: 'João',
-  company: 'Fluxo Logística',
-  branch: 'Sede Eusébio',
+  company: '01 - MATRIZ',
+  branch: 'RUA MARTINS DE CARVALDO 4398',
   role: 'Auxiliar de Operações',
   matricula: '1023',
   bankHours: '+02h30',
@@ -163,8 +164,8 @@ function EmployeeLoginScreen({ onLogin }) {
             Identificamos mais de um vínculo ativo neste CPF.
           </div>
           {[
-            { co: 'Fluxo Logística', role: 'Auxiliar de Operações', branch: 'Sede Eusébio' },
-            { co: 'Fluxo Noturno', role: 'Auxiliar Noturno', branch: 'Filial Maracanaú' },
+            { co: '01 - MATRIZ', role: 'RUA MARTINS DE CARVALDO 4398', branch: '' },
+            { co: '02 - FILIAL SAPIRANGA', role: 'AVENIDA ENGENHEIRO LEAL LIMA VERDE, 306', branch: '' },
           ].map((v, i) => (
             <button key={i}
               onClick={() => { setVinculo(v); setStep('senha'); }}
@@ -177,10 +178,10 @@ function EmployeeLoginScreen({ onLogin }) {
                 width: 40, height: 40, borderRadius: 8, background: '#e6f7ff',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 fontWeight: 700, color: '#007BA4', fontSize: 14,
-              }}>{v.co.split(' ').map(w => w[0]).slice(0,2).join('')}</div>
+              }}>{v.co.split(' - ')[0]}</div>
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: 15, fontWeight: 600, color: 'rgba(0,0,0,0.85)' }}>{v.co}</div>
-                <div style={{ fontSize: 12, color: 'rgba(0,0,0,0.55)' }}>{v.role} · {v.branch}</div>
+                <div style={{ fontSize: 12, color: 'rgba(0,0,0,0.55)' }}>{v.role}</div>
               </div>
               <span style={{ color: 'rgba(0,0,0,0.25)' }}>›</span>
             </button>
@@ -207,7 +208,7 @@ function EmployeeLoginScreen({ onLogin }) {
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontSize: 15, fontWeight: 750, color: 'rgba(0,0,0,0.85)' }}>João Silva</div>
               <div style={{ fontSize: 12, color: 'rgba(0,0,0,0.65)', marginTop: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {vinculo?.co || 'Fluxo Logística'}
+                {vinculo?.co || '01 - MATRIZ'}
               </div>
             </div>
             <button onClick={() => setStep('vinculo')} style={{
@@ -503,7 +504,7 @@ function PunchConfirmModal({ open, time, actionLabel, onCancel, onConfirm }) {
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderTop: '1px solid #f0f0f0' }}>
             <span style={{ color: 'rgba(0,0,0,0.5)' }}>Local</span>
-            <strong style={{ color: 'rgba(0,0,0,0.85)' }}>Sede Eusébio</strong>
+            <strong style={{ color: 'rgba(0,0,0,0.85)' }}>RUA MARTINS DE CARVALDO 4398</strong>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderTop: '1px solid #f0f0f0' }}>
             <span style={{ color: 'rgba(0,0,0,0.5)' }}>Status</span>
@@ -560,6 +561,481 @@ function PunchSuccessModal({ open, time, actionLabel, onClose }) {
           <button onClick={onClose} className="btn primary lg" style={{ width: '100%' }}>OK</button>
         </div>
       </div>
+    </div>
+  );
+}
+
+// ── Biometric Choice Modal ──────────────────────────────────
+function BiometricChoiceModal({ open, onCancel, onChooseBiometric, onChooseFacial, onConfirmManual }) {
+  if (!open) return null;
+  return (
+    <div style={{
+      position: 'absolute', inset: 0, zIndex: 100,
+      background: 'rgba(0,0,0,0.45)',
+      display: 'flex', alignItems: 'flex-end',
+      borderRadius: 48, overflow: 'hidden',
+    }} className="fade-in">
+      <div style={{
+        background: '#fff', borderTopLeftRadius: 24, borderTopRightRadius: 24,
+        width: '100%', padding: '28px 24px 44px',
+        animation: 'slideUp 0.3s cubic-bezier(0.23,1,0.32,1)',
+      }}>
+        <div style={{ width: 36, height: 4, background: '#e8e8e8', borderRadius: 2, margin: '0 auto 18px' }}/>
+        <div style={{ textAlign: 'center', marginBottom: 22 }}>
+          <div style={{
+            width: 56, height: 56, borderRadius: '50%',
+            background: 'linear-gradient(135deg, #e8f8f3, #e3f4fb)',
+            margin: '0 auto 12px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#007BA4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 1v3M12 20v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M1 12h3M20 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+          </div>
+          <div style={{ fontSize: 18, fontWeight: 700, color: 'rgba(0,0,0,0.85)', marginBottom: 6 }}>
+            Como deseja registrar?
+          </div>
+          <div style={{ fontSize: 13, color: 'rgba(0,0,0,0.55)' }}>
+            Escolha o metodo de verificacao
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <button onClick={onChooseBiometric} style={{
+            width: '100%', padding: '16px', borderRadius: 14,
+            border: '1.5px solid #007BA4', background: '#f0f9ff', cursor: 'pointer',
+            display: 'flex', alignItems: 'center', gap: 14,
+          }}>
+            <div style={{
+              width: 44, height: 44, borderRadius: 12,
+              background: 'linear-gradient(135deg, #007BA4, #007BA4)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff',
+            }}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M2 12c0-5 4.2-9 10-9s10 4 10 9"/>
+                <path d="M5 19.5c1.2-1.7 1.8-3.7 1.8-6.2C6.8 10.4 9 8 12 8s5.2 2.4 5.2 5.3c0 2.2-.3 4.1-1.1 5.8"/>
+                <path d="M9.3 21c.8-1.8 1.2-4.2 1.2-7.4 0-.9.6-1.6 1.5-1.6s1.5.7 1.5 1.6c0 3-.3 5.4-.9 7.4"/>
+                <path d="M9 4.2c1-.5 2-.7 3-.7 4.7 0 8 3.2 8 7.9 0 1.8-.1 3.4-.4 4.9"/>
+                <path d="M4.2 15.8c.2-.9.3-1.7.3-2.5C4.5 9 7.7 5.6 12 5.6s7.5 3.4 7.5 7.7"/>
+              </svg>
+            </div>
+            <div style={{ textAlign: 'left', flex: 1 }}>
+              <div style={{ fontSize: 15, fontWeight: 700, color: 'rgba(0,0,0,0.85)' }}>Biometria do celular</div>
+              <div style={{ fontSize: 12, color: 'rgba(0,0,0,0.5)', marginTop: 2 }}>
+                Use a digital ou Face ID do seu aparelho
+              </div>
+            </div>
+            <span style={{ color: 'rgba(0,0,0,0.25)', fontSize: 20 }}>›</span>
+          </button>
+
+          <button onClick={onChooseFacial} style={{
+            width: '100%', padding: '16px', borderRadius: 14,
+            border: '1.5px solid #e8e8e8', background: '#fff', cursor: 'pointer',
+            display: 'flex', alignItems: 'center', gap: 14,
+          }}>
+            <div style={{
+              width: 44, height: 44, borderRadius: 12,
+              background: 'linear-gradient(135deg, #2f9d86, #48bfab)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff',
+            }}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                <circle cx="12" cy="13" r="4"/>
+              </svg>
+            </div>
+            <div style={{ textAlign: 'left', flex: 1 }}>
+              <div style={{ fontSize: 15, fontWeight: 700, color: 'rgba(0,0,0,0.85)' }}>Reconhecimento facial</div>
+              <div style={{ fontSize: 12, color: 'rgba(0,0,0,0.5)', marginTop: 2 }}>
+                Posicione seu rosto na camera
+              </div>
+            </div>
+            <span style={{ color: 'rgba(0,0,0,0.25)', fontSize: 20 }}>›</span>
+          </button>
+        </div>
+
+        <button onClick={onConfirmManual} style={{
+          width: '100%', marginTop: 14, height: 44, border: 0,
+          background: 'transparent', color: '#007BA4', fontSize: 14, fontWeight: 650,
+          cursor: 'pointer',
+        }}>
+          Continuar sem biometria
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ── Biometric Scanning Modal ─────────────────────────────────
+function BiometricScanningModal({ open, onSuccess, onCancel }) {
+  const [phase, setPhase] = React.useState(0);
+
+  React.useEffect(() => {
+    if (!open) return;
+    setPhase(0);
+    const t1 = setTimeout(() => setPhase(1), 500);
+    const t2 = setTimeout(() => setPhase(2), 2200);
+    const t3 = setTimeout(() => { onSuccess(); }, 2800);
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
+  }, [open, onSuccess]);
+
+  if (!open) return null;
+
+  return (
+    <div style={{
+      position: 'absolute', inset: 0, zIndex: 110,
+      background: 'rgba(0,0,0,0.55)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      borderRadius: 48, overflow: 'hidden',
+    }} className="fade-in">
+      <div className="scale-in" style={{
+        background: '#fff', borderRadius: 20, padding: '32px 28px',
+        textAlign: 'center', width: 280,
+      }}>
+        <div style={{
+          width: 80, height: 80, borderRadius: '50%',
+          background: phase === 2
+            ? 'linear-gradient(135deg, #f6ffed, #b7eb8f)'
+            : 'linear-gradient(135deg, #e6f7ff, #91d5ff)',
+          margin: '0 auto 16px',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          transition: 'all 0.4s',
+          boxShadow: phase === 2 ? '0 8px 20px rgba(82,196,26,0.3)' : 'none',
+        }}>
+          {phase === 2 ? (
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#52c41a" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          ) : (
+            <div className={phase === 1 ? 'pulse' : ''}>
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#007BA4" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M2 12c0-5 4.2-9 10-9s10 4 10 9"/>
+                <path d="M5 19.5c1.2-1.7 1.8-3.7 1.8-6.2C6.8 10.4 9 8 12 8s5.2 2.4 5.2 5.3c0 2.2-.3 4.1-1.1 5.8"/>
+                <path d="M9.3 21c.8-1.8 1.2-4.2 1.2-7.4 0-.9.6-1.6 1.5-1.6s1.5.7 1.5 1.6c0 3-.3 5.4-.9 7.4"/>
+                <path d="M9 4.2c1-.5 2-.7 3-.7 4.7 0 8 3.2 8 7.9 0 1.8-.1 3.4-.4 4.9"/>
+                <path d="M4.2 15.8c.2-.9.3-1.7.3-2.5C4.5 9 7.7 5.6 12 5.6s7.5 3.4 7.5 7.7"/>
+              </svg>
+            </div>
+          )}
+        </div>
+        <div style={{
+          fontSize: 17, fontWeight: 700,
+          color: phase === 2 ? '#389e0d' : 'rgba(0,0,0,0.85)',
+          marginBottom: 6, transition: 'color 0.3s',
+        }}>
+          {phase === 2 ? 'Biometria verificada!' : phase === 1 ? 'Toque no sensor' : 'Preparando...'}
+        </div>
+        <div style={{ fontSize: 13, color: 'rgba(0,0,0,0.5)', lineHeight: 1.4 }}>
+          {phase === 2
+            ? 'Identidade confirmada com sucesso'
+            : 'Use a biometria do seu celular para confirmar'}
+        </div>
+        {phase < 2 && (
+          <button onClick={onCancel} style={{
+            marginTop: 20, height: 36, border: 0, background: 'transparent',
+            color: 'rgba(0,0,0,0.45)', fontSize: 13, cursor: 'pointer',
+          }}>
+            Cancelar
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── Face Recognition Modal (camera + tesseract.js) ────────────
+function FaceRecognitionModal({ open, onSuccess, onCancel }) {
+  const videoRef = React.useRef(null);
+  const canvasRef = React.useRef(null);
+  const [phase, setPhase] = React.useState('init');
+  const [progress, setProgress] = React.useState(0);
+  const streamRef = React.useRef(null);
+
+  const reset = () => {
+    setPhase('init');
+    setProgress(0);
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(t => t.stop());
+      streamRef.current = null;
+    }
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
+  };
+
+  React.useEffect(() => {
+    if (!open) return;
+    let cancelled = false;
+
+    const run = async () => {
+      setPhase('init');
+      setProgress(0);
+
+      // Phase 1 — Initialize camera
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } },
+        });
+        if (cancelled) { stream.getTracks().forEach(t => t.stop()); return; }
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          streamRef.current = stream;
+          await videoRef.current.play();
+        }
+      } catch (e) {
+        // Camera unavailable — still proceed with simulation
+      }
+
+      if (cancelled) return;
+      setPhase('camera');
+      await new Promise(r => setTimeout(r, 800));
+
+      // Phase 2 — Scanning
+      if (cancelled) return;
+      setPhase('scanning');
+      const scanStart = Date.now();
+      const scanDuration = 2200;
+
+      const progressTimer = setInterval(() => {
+        if (cancelled) { clearInterval(progressTimer); return; }
+        const elapsed = Date.now() - scanStart;
+        setProgress(Math.min(95, Math.round((elapsed / scanDuration) * 100)));
+      }, 100);
+
+      await new Promise(r => setTimeout(r, scanDuration));
+      clearInterval(progressTimer);
+      if (cancelled) return;
+
+      // Phase 3 — Tesseract.js processing
+      setPhase('processing');
+      setProgress(96);
+
+      try {
+        if (canvasRef.current) {
+          const canvas = canvasRef.current;
+          canvas.width = 320;
+          canvas.height = 240;
+          const ctx = canvas.getContext('2d');
+          if (videoRef.current && videoRef.current.readyState >= 2) {
+            ctx.save();
+            ctx.scale(-1, 1);
+            ctx.drawImage(videoRef.current, -320, 0, 320, 240);
+            ctx.restore();
+          } else {
+            ctx.fillStyle = '#1a1a2e';
+            ctx.fillRect(0, 0, 320, 240);
+          }
+
+          await Tesseract.recognize(canvas, 'eng', {
+            logger: m => {
+              if (cancelled) return;
+              if (m.status === 'recognizing text') {
+                setProgress(96 + Math.round(m.progress * 0.04));
+              }
+            },
+          });
+        }
+      } catch (e) {
+        // Tesseract error — simulation continues
+      }
+
+      if (cancelled) return;
+      setProgress(100);
+      setPhase('success');
+    };
+
+    run();
+
+    return () => {
+      cancelled = true;
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(t => t.stop());
+        streamRef.current = null;
+      }
+    };
+  }, [open]);
+
+  React.useEffect(() => {
+    if (phase === 'success') {
+      const t = setTimeout(() => { reset(); onSuccess(); }, 1600);
+      return () => clearTimeout(t);
+    }
+  }, [phase, onSuccess]);
+
+  const handleCancel = () => {
+    reset();
+    onCancel();
+  };
+
+  if (!open) return null;
+
+  const isActive = phase === 'scanning' || phase === 'processing';
+
+  return (
+    <div style={{
+      position: 'absolute', inset: 0, zIndex: 110, background: '#000',
+      display: 'flex', flexDirection: 'column',
+      borderRadius: 48, overflow: 'hidden',
+    }}>
+      {/* Camera area */}
+      <div style={{
+        flex: 1, position: 'relative', background: '#111',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        overflow: 'hidden',
+      }}>
+        <video
+          ref={videoRef}
+          autoPlay
+          playsInline
+          muted
+          style={{
+            width: '100%', height: '100%', objectFit: 'cover',
+            opacity: phase === 'success' ? 0.5 : 1,
+            transform: 'scaleX(-1)',
+            transition: 'opacity 0.4s',
+          }}
+        />
+
+        {/* Dark placeholder when no camera */}
+        <div style={{
+          position: 'absolute', inset: 0,
+          background: 'linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          opacity: phase === 'success' ? 0.3 : 1, transition: 'opacity 0.4s',
+        }}>
+          <div style={{
+            width: 80, height: 80, borderRadius: '50%',
+            background: 'linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03))',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+          </div>
+        </div>
+
+        {/* Face guide oval */}
+        <div style={{
+          position: 'absolute', inset: 0,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          pointerEvents: 'none',
+        }}>
+          <div style={{
+            width: 190, height: 250, borderRadius: '50% 50% 42% 42%',
+            border: phase === 'success' ? '3px solid #52c41a'
+              : isActive ? '3px solid rgba(255,255,255,0.65)'
+              : '3px solid rgba(255,255,255,0.18)',
+            boxShadow: phase === 'success' ? '0 0 36px rgba(82,196,26,0.45)'
+              : isActive ? '0 0 24px rgba(255,255,255,0.12)'
+              : 'none',
+            transition: 'all 0.4s',
+          }}/>
+        </div>
+
+        {/* Corner guides */}
+        {isActive && (
+          <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+            {['top-left','top-right','bottom-left','bottom-right'].map((pos, i) => {
+              const css = {
+                position: 'absolute', width: 24, height: 24,
+                borderColor: 'rgba(255,255,255,0.6)',
+              };
+              if (pos === 'top-left') { css.top = 110; css.left = 60; css.borderTop = '2px solid'; css.borderLeft = '2px solid'; css.borderTopLeftRadius = 8; }
+              if (pos === 'top-right') { css.top = 110; css.right = 60; css.borderTop = '2px solid'; css.borderRight = '2px solid'; css.borderTopRightRadius = 8; }
+              if (pos === 'bottom-left') { css.bottom = 130; css.left = 60; css.borderBottom = '2px solid'; css.borderLeft = '2px solid'; css.borderBottomLeftRadius = 8; }
+              if (pos === 'bottom-right') { css.bottom = 130; css.right = 60; css.borderBottom = '2px solid'; css.borderRight = '2px solid'; css.borderBottomRightRadius = 8; }
+              return <div key={pos} style={css}/>;
+            })}
+          </div>
+        )}
+
+        {/* Top status label */}
+        <div style={{
+          position: 'absolute', top: 60, left: 0, right: 0, textAlign: 'center',
+        }}>
+          {isActive && (
+            <div style={{
+              color: '#fff', fontSize: 15, fontWeight: 600,
+              textShadow: '0 1px 4px rgba(0,0,0,0.5)',
+              display: 'inline-flex', alignItems: 'center', gap: 8,
+            }}>
+              <span className="pulse" style={{
+                width: 8, height: 8, borderRadius: '50%', background: '#52c41a',
+                display: 'inline-block',
+              }}/>
+              Posicione seu rosto no centro
+            </div>
+          )}
+          {phase === 'success' && (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+              <div style={{
+                width: 64, height: 64, borderRadius: '50%',
+                background: 'rgba(82,196,26,0.18)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                border: '2.5px solid #52c41a',
+              }}>
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#52c41a" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+              </div>
+              <div style={{ color: '#52c41a', fontSize: 18, fontWeight: 700 }}>
+                Rosto verificado!
+              </div>
+              <div style={{ color: 'rgba(255,255,255,0.75)', fontSize: 13, fontWeight: 500 }}>
+                Reconhecimento facial confirmado
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Progress bar */}
+        {isActive && (
+          <div style={{ position: 'absolute', bottom: 80, left: 40, right: 40 }}>
+            <div style={{
+              height: 4, background: 'rgba(255,255,255,0.18)', borderRadius: 2,
+              overflow: 'hidden',
+            }}>
+              <div style={{
+                height: '100%',
+                background: 'linear-gradient(90deg, #2f9d86, #48bfab, #5fc0e0)',
+                borderRadius: 2,
+                width: `${Math.min(progress, 100)}%`,
+                transition: 'width 0.3s ease',
+              }}/>
+            </div>
+            <div style={{
+              textAlign: 'center', marginTop: 10,
+              color: 'rgba(255,255,255,0.55)', fontSize: 12,
+              fontWeight: 500,
+            }}>
+              {phase === 'processing' ? 'Tesseract.js processando...' : 'Analisando...'} {Math.floor(progress)}%
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Bottom bar */}
+      <div style={{
+        padding: '20px 24px 40px', background: '#000',
+        display: 'flex', justifyContent: 'center',
+      }}>
+        {phase !== 'success' && (
+          <button onClick={handleCancel} style={{
+            width: 52, height: 52, borderRadius: '50%',
+            border: '2px solid rgba(255,255,255,0.22)',
+            background: 'rgba(255,255,255,0.06)', color: '#fff',
+            cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        )}
+      </div>
+
+      {/* Hidden canvas for tesseract */}
+      <canvas ref={canvasRef} style={{ display: 'none' }}/>
     </div>
   );
 }
@@ -837,7 +1313,7 @@ function EmployeeProfileScreen({ onLogout }) {
 
       <div style={{ padding: '0 16px', fontSize: 11, color: 'rgba(0,0,0,0.45)', textTransform: 'uppercase', letterSpacing: 0.5 }}>Trabalho</div>
       <div style={{ background: '#fff', margin: '8px 0', borderRadius: 12, overflow: 'hidden' }}>
-        <Item icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>} label="Meus vínculos" value="Fluxo Logística, Fluxo Noturno"/>
+        <Item icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>} label="Meus vínculos" value="01 - MATRIZ, 02 - FILIAL SAPIRANGA"/>
         <Item icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/></svg>} label="Escala mensal"/>
         <Item icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>} label="Comprovantes de ponto"/>
       </div>
@@ -1080,7 +1556,7 @@ function EmployeeDayDetail({ day, onBack }) {
                     </div>
                     {b.t !== 'pendente' && (
                       <div style={{ fontSize: 11, color: 'rgba(0,0,0,0.5)', marginTop: 2 }}>
-                        App Mobile · Sede Eusébio · ✓ Validado
+                        App Mobile · RUA MARTINS DE CARVALDO 4398 · ✓ Validado
                       </div>
                     )}
                   </div>
@@ -1124,12 +1600,16 @@ function EmployeeDayDetail({ day, onBack }) {
 
 // ── Employee App Shell ───────────────────────────────────────
 function EmployeeApp({ onExitToLanding }) {
-  const [screen, setScreen] = React.useState('login'); // login | home | history | requests | profile | day
+  const [screen, setScreen] = React.useState('login');
   const [confirming, setConfirming] = React.useState(false);
   const [success, setSuccess] = React.useState(false);
   const [openDay, setOpenDay] = React.useState(null);
 
-  // batidas state — initial: entry already done at 08:01
+  // Biometric / facial recognition states
+  const [biometricChoiceOpen, setBiometricChoiceOpen] = React.useState(false);
+  const [biometricScanning, setBiometricScanning] = React.useState(false);
+  const [faceScanning, setFaceScanning] = React.useState(false);
+
   const [batidas, setBatidas] = React.useState([
     { label: 'Entrada', time: '08:01', status: 'done' },
     { label: 'Saída almoço', time: 'pendente', status: 'pending' },
@@ -1151,8 +1631,7 @@ function EmployeeApp({ onExitToLanding }) {
     exit: 'saída',
   }[nextAction] || 'batida';
 
-  const handleConfirm = () => {
-    setConfirming(false);
+  const recordPunch = () => {
     const time = clock.hhmm;
     setBatidas(prev => {
       const copy = [...prev];
@@ -1163,13 +1642,53 @@ function EmployeeApp({ onExitToLanding }) {
     setSuccess(true);
   };
 
+  const handlePunch = () => {
+    setBiometricChoiceOpen(true);
+  };
+
+  const handleBiometricChoiceCancel = () => {
+    setBiometricChoiceOpen(false);
+  };
+
+  const handleChooseBiometric = () => {
+    setBiometricChoiceOpen(false);
+    setBiometricScanning(true);
+  };
+
+  const handleChooseFacial = () => {
+    setBiometricChoiceOpen(false);
+    setFaceScanning(true);
+  };
+
+  const handleConfirmManual = () => {
+    setBiometricChoiceOpen(false);
+    setConfirming(true);
+  };
+
+  const handleBiometricSuccess = () => {
+    setBiometricScanning(false);
+    recordPunch();
+  };
+
+  const handleFaceSuccess = () => {
+    setFaceScanning(false);
+    recordPunch();
+  };
+
+  const handleFaceCancel = () => {
+    setFaceScanning(false);
+  };
+
+  const handleBiometricCancel = () => {
+    setBiometricScanning(false);
+  };
+
   return (
     <div className="employee-preview-shell" style={{
       width: '100%', minHeight: '100vh', background: '#0a0a0a',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       padding: 24, position: 'relative',
     }}>
-      {/* Back to landing */}
       <button className="employee-preview-back" onClick={onExitToLanding} style={{
         position: 'absolute', top: 20, left: 20,
         height: 36, padding: '0 14px', borderRadius: 8,
@@ -1196,7 +1715,7 @@ function EmployeeApp({ onExitToLanding }) {
                 onLogout={() => setScreen('login')}
                 batidas={batidas}
                 nextAction={nextAction}
-                onPunch={() => setConfirming(true)}
+                onPunch={handlePunch}
               />
             )}
             {screen === 'history' && (
@@ -1211,7 +1730,6 @@ function EmployeeApp({ onExitToLanding }) {
               <EmployeeDayDetail day={openDay} onBack={() => setScreen('history')}/>
             )}
 
-            {/* Bottom tab bar — hidden on login and day detail */}
             {['home', 'history', 'requests', 'profile'].includes(screen) && (
               <BottomTabBar
                 active={screen}
@@ -1220,12 +1738,32 @@ function EmployeeApp({ onExitToLanding }) {
               />
             )}
 
+            <BiometricChoiceModal
+              open={biometricChoiceOpen}
+              onCancel={handleBiometricChoiceCancel}
+              onChooseBiometric={handleChooseBiometric}
+              onChooseFacial={handleChooseFacial}
+              onConfirmManual={handleConfirmManual}
+            />
+
+            <BiometricScanningModal
+              open={biometricScanning}
+              onSuccess={handleBiometricSuccess}
+              onCancel={handleBiometricCancel}
+            />
+
+            <FaceRecognitionModal
+              open={faceScanning}
+              onSuccess={handleFaceSuccess}
+              onCancel={handleFaceCancel}
+            />
+
             <PunchConfirmModal
               open={confirming}
               time={clock.hhmm}
               actionLabel={nextLabelHuman}
               onCancel={() => setConfirming(false)}
-              onConfirm={handleConfirm}
+              onConfirm={() => { setConfirming(false); recordPunch(); }}
             />
             <PunchSuccessModal
               open={success}

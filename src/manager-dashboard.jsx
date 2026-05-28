@@ -347,7 +347,7 @@ function FilterRow({ exportOpen, setExportOpen }) {
       padding: 16, marginBottom: 16,
       display: 'flex', alignItems: 'flex-end', gap: 12, flexWrap: 'wrap',
     }}>
-      <Field label="Empresa" value="Fluxo Logística" w={170}/>
+      <Field label="Empresa" value="01 - MATRIZ" w={170}/>
       <Field label="Filial" value="Todas (12)" w={130}/>
       <Field label="Departamento" value="Operação" w={140}/>
       <Field label="Cargo" value="Todos" w={120}/>
@@ -532,24 +532,24 @@ function DayDetailDrawer({ open, data, onClose }) {
   const batidas = (() => {
     if (cell.status === 'regular' || cell.status === 'extra') {
       return [
-        { tipo: 'Entrada', time: cell.inTime, method: 'App Mobile', loc: 'Sede Eusébio', valid: true },
-        { tipo: 'Saída almoço', time: '12:0' + ((day * 3) % 6), method: 'App Mobile', loc: 'Sede Eusébio', valid: true },
-        { tipo: 'Retorno', time: '13:0' + ((day * 7) % 5), method: 'App Mobile', loc: 'Sede Eusébio', valid: true },
-        { tipo: 'Saída', time: cell.outTime, method: 'App Mobile', loc: 'Sede Eusébio', valid: true },
+        { tipo: 'Entrada', time: cell.inTime, method: 'App Mobile', loc: '01 - MATRIZ', valid: true },
+        { tipo: 'Saída almoço', time: '12:0' + ((day * 3) % 6), method: 'App Mobile', loc: '01 - MATRIZ', valid: true },
+        { tipo: 'Retorno', time: '13:0' + ((day * 7) % 5), method: 'App Mobile', loc: '01 - MATRIZ', valid: true },
+        { tipo: 'Saída', time: cell.outTime, method: 'App Mobile', loc: '01 - MATRIZ', valid: true },
       ];
     }
     if (cell.status === 'inconsistente') {
       return [
-        { tipo: 'Entrada', time: cell.inTime, method: 'App Mobile', loc: 'Sede Eusébio', valid: true },
-        { tipo: 'Saída almoço', time: '12:01', method: 'App Mobile', loc: 'Sede Eusébio', valid: true },
+        { tipo: 'Entrada', time: cell.inTime, method: 'App Mobile', loc: '01 - MATRIZ', valid: true },
+        { tipo: 'Saída almoço', time: '12:01', method: 'App Mobile', loc: '01 - MATRIZ', valid: true },
         { tipo: 'Retorno almoço', time: '—', pending: true },
-        { tipo: 'Saída', time: '18:02', method: 'App Mobile', loc: 'Sede Eusébio', valid: true },
+        { tipo: 'Saída', time: '18:02', method: 'App Mobile', loc: '01 - MATRIZ', valid: true },
       ];
     }
     if (cell.status === 'folga-trab' || cell.status === 'feriado-trab') {
       return [
-        { tipo: 'Entrada', time: cell.inTime, method: 'Coletor (Web)', loc: 'Filial Maracanaú', valid: true },
-        { tipo: 'Saída', time: cell.outTime, method: 'Coletor (Web)', loc: 'Filial Maracanaú', valid: true },
+        { tipo: 'Entrada', time: cell.inTime, method: 'Coletor (Web)', loc: '02 - FILIAL SAPIRANGA', valid: true },
+        { tipo: 'Saída', time: cell.outTime, method: 'Coletor (Web)', loc: '02 - FILIAL SAPIRANGA', valid: true },
       ];
     }
     return [];
