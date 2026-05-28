@@ -749,10 +749,10 @@ function FaceRecognitionModal({ open, onSuccess, onCancel }) {
   const [phase, setPhase] = React.useState('init');
   const [progress, setProgress] = React.useState(0);
   const streamRef = React.useRef(null);
+  const onSuccessRef = React.useRef(onSuccess);
+  onSuccessRef.current = onSuccess;
 
   const reset = () => {
-    setPhase('init');
-    setProgress(0);
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(t => t.stop());
       streamRef.current = null;
@@ -770,7 +770,6 @@ function FaceRecognitionModal({ open, onSuccess, onCancel }) {
       setPhase('init');
       setProgress(0);
 
-      // Phase 1 — Initialize camera
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
           video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } },
@@ -781,15 +780,12 @@ function FaceRecognitionModal({ open, onSuccess, onCancel }) {
           streamRef.current = stream;
           await videoRef.current.play();
         }
-      } catch (e) {
-        // Camera unavailable — still proceed with simulation
-      }
+      } catch (e) {}
 
       if (cancelled) return;
       setPhase('camera');
       await new Promise(r => setTimeout(r, 800));
 
-      // Phase 2 — Scanning
       if (cancelled) return;
       setPhase('scanning');
       const scanStart = Date.now();
@@ -805,7 +801,6 @@ function FaceRecognitionModal({ open, onSuccess, onCancel }) {
       clearInterval(progressTimer);
       if (cancelled) return;
 
-      // Phase 3 — Tesseract.js processing
       setPhase('processing');
       setProgress(96);
 
@@ -834,9 +829,7 @@ function FaceRecognitionModal({ open, onSuccess, onCancel }) {
             },
           });
         }
-      } catch (e) {
-        // Tesseract error — simulation continues
-      }
+      } catch (e) {}
 
       if (cancelled) return;
       setProgress(100);
@@ -856,10 +849,10 @@ function FaceRecognitionModal({ open, onSuccess, onCancel }) {
 
   React.useEffect(() => {
     if (phase === 'success') {
-      const t = setTimeout(() => { reset(); onSuccess(); }, 3000);
+      const t = setTimeout(() => { reset(); onSuccessRef.current(); }, 3000);
       return () => clearTimeout(t);
     }
-  }, [phase, onSuccess]);
+  }, [phase]);
 
   const handleCancel = () => {
     reset();
@@ -874,7 +867,7 @@ function FaceRecognitionModal({ open, onSuccess, onCancel }) {
     <div style={{
       position: 'absolute', inset: 0, zIndex: 110, background: '#000',
       display: 'flex', flexDirection: 'column',
-      borderRadius: 48, overflow: 'hidden',
+      overflow: 'hidden',
     }}>
       {/* Camera area */}
       <div style={{
@@ -1019,19 +1012,17 @@ function FaceRecognitionModal({ open, onSuccess, onCancel }) {
         padding: '20px 24px 40px', background: '#000',
         display: 'flex', justifyContent: 'center',
       }}>
-        {phase !== 'success' && (
-          <button onClick={handleCancel} style={{
-            width: 52, height: 52, borderRadius: '50%',
-            border: '2px solid rgba(255,255,255,0.22)',
-            background: 'rgba(255,255,255,0.06)', color: '#fff',
-            cursor: 'pointer',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}>
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-            </svg>
-          </button>
-        )}
+        <button onClick={handleCancel} style={{
+          width: 52, height: 52, borderRadius: '50%',
+          border: '2px solid rgba(255,255,255,0.22)',
+          background: 'rgba(255,255,255,0.06)', color: '#fff',
+          cursor: 'pointer',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
       </div>
 
       {/* Hidden canvas for tesseract */}
