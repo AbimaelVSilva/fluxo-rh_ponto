@@ -521,7 +521,7 @@ function PunchConfirmModal({ open, time, actionLabel, onCancel, onConfirm }) {
 }
 
 // ── Success Modal ────────────────────────────────────────────
-function PunchSuccessModal({ open, time, actionLabel, onClose }) {
+function PunchSuccessModal({ open, time, actionLabel, onClose, onVerComprovante }) {
   if (!open) return null;
   return (
     <div style={{
@@ -551,7 +551,7 @@ function PunchSuccessModal({ open, time, actionLabel, onClose }) {
           {actionLabel} registrada às <strong style={{ color: '#007BA4' }}>{time}</strong>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          <button className="btn ghost lg" style={{ width: '100%' }}>
+          <button onClick={() => { onClose(); onVerComprovante(); }} className="btn ghost lg" style={{ width: '100%' }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
               <polyline points="14 2 14 8 20 8"/>
@@ -559,6 +559,238 @@ function PunchSuccessModal({ open, time, actionLabel, onClose }) {
             Ver comprovante
           </button>
           <button onClick={onClose} className="btn primary lg" style={{ width: '100%' }}>OK</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Comprovante Modal ────────────────────────────────────────
+function ComprovanteModal({ open, onClose, time, actionLabel, employee, branch }) {
+  const compRef = React.useRef(null);
+  const protocolo = React.useMemo(() => `PTO-${Date.now().toString(36).toUpperCase().slice(-8)}`, []);
+  const data = React.useMemo(() => ({
+    dateStr: `${String(new Date().getDate()).padStart(2, '0')}/${String(new Date().getMonth()+1).padStart(2, '0')}/${new Date().getFullYear()}`,
+    horaStr: `${String(new Date().getHours()).padStart(2, '0')}:${String(new Date().getMinutes()).padStart(2, '0')}:${String(new Date().getSeconds()).padStart(2, '0')}`,
+  }), []);
+
+  if (!open) return null;
+
+  const { dateStr, horaStr } = data;
+
+  const handleShare = async () => {
+    const text = `Comprovante de Ponto\n${employee.name} · Matricula ${employee.matricula}\n${actionLabel} · ${time}h\n${dateStr} · ${horaStr}\nLocal: ${branch}\nProtocolo: ${protocolo}\n\nFluxoRH — Registro de Ponto`;
+    if (navigator.share) {
+      try { await navigator.share({ title: 'Comprovante de Ponto', text }); } catch (e) {}
+    } else {
+      await navigator.clipboard.writeText(text);
+      alert('Comprovante copiado para a area de transferencia!');
+    }
+  };
+
+  const handleSave = () => {
+    if (compRef.current) {
+      const el = compRef.current;
+      const style = document.createElement('style');
+      style.textContent = '@media print { body { margin:0; } body * { visibility:hidden; } #comprovante-print, #comprovante-print * { visibility:visible; } #comprovante-print { position:absolute; left:0; top:0; width:100%; } .btn-row { display:none !important; } }';
+      document.head.appendChild(style);
+      window.print();
+      setTimeout(() => document.head.removeChild(style), 100);
+    }
+  };
+
+  return (
+    <div style={{
+      position: 'absolute', inset: 0, zIndex: 120,
+      background: 'rgba(0,0,0,0.5)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      borderRadius: 48, overflow: 'hidden', padding: 16,
+    }} className="fade-in">
+      <div className="scale-in" style={{
+        background: '#fff', borderRadius: 14, width: '100%', maxHeight: '92%',
+        display: 'flex', flexDirection: 'column',
+        boxShadow: '0 12px 40px rgba(0,0,0,0.18)',
+      }}>
+        {/* Header bar */}
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          padding: '12px 16px', borderBottom: '1px solid #f0f0f0',
+        }}>
+          <div style={{ fontSize: 14, fontWeight: 700, color: 'rgba(0,0,0,0.85)' }}>
+            Comprovante de Ponto
+          </div>
+          <button onClick={onClose} style={{
+            width: 32, height: 32, borderRadius: 8, border: 'none', background: '#f5f5f5',
+            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(0,0,0,0.55)" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+
+        {/* Receipt body */}
+        <div ref={compRef} id="comprovante-print" style={{
+          padding: '20px 16px', overflowY: 'auto', flex: 1,
+          display: 'flex', flexDirection: 'column', gap: 14,
+          background: '#fafafa',
+        }}>
+          {/* Brand header */}
+          <div style={{
+            textAlign: 'center', paddingBottom: 14,
+            borderBottom: '1px dashed #d9d9d9',
+          }}>
+            <img src={fluxoLogo} alt="FluxoRH" style={{ height: 28, width: 'auto', display: 'block', margin: '0 auto 8px' }}/>
+            <div style={{ fontSize: 16, fontWeight: 700, color: '#007BA4' }}>
+              FluxoRH
+            </div>
+            <div style={{ fontSize: 11, color: 'rgba(0,0,0,0.4)', marginTop: 2 }}>
+              Sistema de Registro de Ponto Eletronico
+            </div>
+          </div>
+
+          {/* Status banner */}
+          <div style={{
+            textAlign: 'center', padding: '10px 14px',
+            background: 'linear-gradient(135deg, #f6ffed, #e6fffb)',
+            borderRadius: 10, border: '1px solid #b7eb8f',
+          }}>
+            <div style={{
+              display: 'inline-flex', alignItems: 'center', gap: 6,
+            }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#52c41a" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              <span style={{ fontSize: 13, fontWeight: 700, color: '#389e0d' }}>
+                Ponto Registrado com Sucesso
+              </span>
+            </div>
+          </div>
+
+          {/* Employee info */}
+          <div style={{
+            background: '#fff', borderRadius: 10, padding: 14,
+            border: '1px solid #f0f0f0',
+          }}>
+            <div style={{ fontSize: 10, color: 'rgba(0,0,0,0.4)', textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 10 }}>
+              Dados do Funcionario
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+              <div style={{
+                width: 42, height: 42, borderRadius: 12,
+                background: 'linear-gradient(135deg, #007BA4, #007BA4)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: '#fff', fontWeight: 700, fontSize: 15,
+              }}>{employee.name.split(' ').map(w => w[0]).slice(0, 2).join('')}</div>
+              <div>
+                <div style={{ fontSize: 15, fontWeight: 700, color: 'rgba(0,0,0,0.85)' }}>{employee.name}</div>
+                <div style={{ fontSize: 12, color: 'rgba(0,0,0,0.5)' }}>Matricula: {employee.matricula}</div>
+              </div>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+              <div style={{ fontSize: 11, color: 'rgba(0,0,0,0.45)' }}>Empresa</div>
+              <div style={{ fontSize: 12, fontWeight: 600, color: 'rgba(0,0,0,0.85)', textAlign: 'right' }}>{employee.company}</div>
+              <div style={{ fontSize: 11, color: 'rgba(0,0,0,0.45)' }}>Cargo</div>
+              <div style={{ fontSize: 12, fontWeight: 600, color: 'rgba(0,0,0,0.85)', textAlign: 'right' }}>{employee.role}</div>
+            </div>
+          </div>
+
+          {/* Punch details */}
+          <div style={{
+            background: '#fff', borderRadius: 10, padding: 14,
+            border: '1px solid #f0f0f0',
+          }}>
+            <div style={{ fontSize: 10, color: 'rgba(0,0,0,0.4)', textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 10 }}>
+              Detalhes da Batida
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ fontSize: 12, color: 'rgba(0,0,0,0.5)' }}>Tipo</span>
+                <span style={{ fontSize: 13, fontWeight: 600, color: '#007BA4' }}>{actionLabel}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ fontSize: 12, color: 'rgba(0,0,0,0.5)' }}>Horario</span>
+                <span style={{ fontSize: 13, fontWeight: 700, color: 'rgba(0,0,0,0.85)', fontVariantNumeric: 'tabular-nums' }}>{time}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ fontSize: 12, color: 'rgba(0,0,0,0.5)' }}>Data</span>
+                <span style={{ fontSize: 13, fontWeight: 600, color: 'rgba(0,0,0,0.85)' }}>{dateStr}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ fontSize: 12, color: 'rgba(0,0,0,0.5)' }}>Local</span>
+                <span style={{ fontSize: 13, fontWeight: 600, color: 'rgba(0,0,0,0.85)', textAlign: 'right' }}>{branch}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ fontSize: 12, color: 'rgba(0,0,0,0.5)' }}>Dispositivo</span>
+                <span style={{ fontSize: 13, fontWeight: 600, color: 'rgba(0,0,0,0.85)' }}>App Mobile</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ fontSize: 12, color: 'rgba(0,0,0,0.5)' }}>Validacao</span>
+                <span style={{ fontSize: 13, fontWeight: 600, color: '#52c41a' }}>✓ Biometria facial</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Protocol / footer */}
+          <div style={{
+            textAlign: 'center', paddingTop: 8,
+            borderTop: '1px dashed #d9d9d9',
+          }}>
+            <div style={{
+              fontSize: 10, color: 'rgba(0,0,0,0.35)',
+              textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 4,
+            }}>
+              Protocolo
+            </div>
+            <div style={{
+              fontSize: 18, fontWeight: 700, fontFamily: 'monospace',
+              color: 'rgba(0,0,0,0.35)', letterSpacing: 1,
+              background: '#f5f5f5', padding: '4px 12px', borderRadius: 6,
+              display: 'inline-block',
+            }}>
+              {protocolo}
+            </div>
+            <div style={{
+              fontSize: 10, color: 'rgba(0,0,0,0.3)', marginTop: 10,
+              lineHeight: 1.4,
+            }}>
+              Registro gerado em {dateStr} as {horaStr}<br/>
+              FluxoRH — Todos os direitos reservados
+            </div>
+          </div>
+        </div>
+
+        {/* Action buttons */}
+        <div className="btn-row" style={{
+          display: 'flex', gap: 10, padding: '12px 16px 16px',
+          borderTop: '1px solid #f0f0f0', background: '#fff',
+          borderBottomLeftRadius: 14, borderBottomRightRadius: 14,
+        }}>
+          <button onClick={handleShare} style={{
+            flex: 1, height: 44, borderRadius: 10,
+            border: '1.5px solid #007BA4', background: '#fff',
+            color: '#007BA4', fontSize: 14, fontWeight: 650,
+            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+          }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+              <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+            </svg>
+            Compartilhar
+          </button>
+          <button onClick={handleSave} style={{
+            flex: 1, height: 44, borderRadius: 10,
+            border: 'none', background: '#007BA4',
+            color: '#fff', fontSize: 14, fontWeight: 650,
+            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+            boxShadow: '0 4px 12px rgba(0,123,164,0.3)',
+          }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+              <polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>
+            </svg>
+            Salvar
+          </button>
         </div>
       </div>
     </div>
@@ -668,15 +900,17 @@ function BiometricChoiceModal({ open, onCancel, onChooseBiometric, onChooseFacia
 // ── Biometric Scanning Modal ─────────────────────────────────
 function BiometricScanningModal({ open, onSuccess, onCancel }) {
   const [phase, setPhase] = React.useState(0);
+  const onSuccessRef = React.useRef(onSuccess);
+  onSuccessRef.current = onSuccess;
 
   React.useEffect(() => {
     if (!open) return;
     setPhase(0);
     const t1 = setTimeout(() => setPhase(1), 500);
     const t2 = setTimeout(() => setPhase(2), 2200);
-    const t3 = setTimeout(() => { onSuccess(); }, 2800);
+    const t3 = setTimeout(() => { onSuccessRef.current(); }, 3000);
     return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
-  }, [open, onSuccess]);
+  }, [open]);
 
   if (!open) return null;
 
@@ -1600,6 +1834,7 @@ function EmployeeApp({ onExitToLanding }) {
   const [biometricChoiceOpen, setBiometricChoiceOpen] = React.useState(false);
   const [biometricScanning, setBiometricScanning] = React.useState(false);
   const [faceScanning, setFaceScanning] = React.useState(false);
+  const [comprovanteOpen, setComprovanteOpen] = React.useState(false);
 
   const [batidas, setBatidas] = React.useState([
     { label: 'Entrada', time: '08:01', status: 'done' },
@@ -1761,6 +1996,15 @@ function EmployeeApp({ onExitToLanding }) {
               time={clock.hhmm}
               actionLabel={nextLabelHuman[0].toUpperCase() + nextLabelHuman.slice(1)}
               onClose={() => setSuccess(false)}
+              onVerComprovante={() => setComprovanteOpen(true)}
+            />
+            <ComprovanteModal
+              open={comprovanteOpen}
+              onClose={() => setComprovanteOpen(false)}
+              time={clock.hhmm}
+              actionLabel={nextLabelHuman[0].toUpperCase() + nextLabelHuman.slice(1)}
+              employee={EMP_DATA}
+              branch={EMP_DATA.branch}
             />
           </div>
         </IOSDevice>
