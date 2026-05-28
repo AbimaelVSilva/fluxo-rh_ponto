@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>FluxoRH · Sistema de Ponto</title>
+<link rel="icon" type="image/x-icon" href="assets/favicon.ico"/>
+
+<!-- Brand assets referenced from JSX (not from HTML attributes) — must be declared so the bundler inlines them -->
+<meta name="ext-resource-dependency" content="assets/fluxorh-logo.png" data-resource-id="brandLogo"/>
+<meta name="ext-resource-dependency" content="assets/fluxorh-logo-dark.png" data-resource-id="brandLogoDark"/>
+<meta name="ext-resource-dependency" content="assets/fluxorh-mark.png" data-resource-id="brandMark"/>
+<meta name="ext-resource-dependency" content="assets/fluxorh-mark-dark.png" data-resource-id="brandMarkDark"/>
+
+</head>
+<body>
+<template id="__bundler_thumbnail" data-bg-color="#f6f8fb">
+  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="brand" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#2f9d86"/>
+        <stop offset="45%" stop-color="#5fc0e0"/>
+        <stop offset="75%" stop-color="#3b7fc9"/>
+        <stop offset="100%" stop-color="#0c3b5c"/>
+      </linearGradient>
+    </defs>
+    <rect width="1200" height="800" fill="#f6f8fb"/>
+    <g transform="translate(330, 200)" fill="url(#brand)">
+      <path d="M0 200 C 100 80, 240 60, 320 130 C 380 180, 460 180, 540 130 C 600 90, 540 210, 460 240 C 380 270, 280 270, 200 260 C 100 250, 40 230, 0 200 Z" opacity="0.95"/>
+      <circle cx="430" cy="100" r="18"/>
+      <circle cx="80" cy="280" r="16"/>
+    </g>
+    <text x="600" y="620" text-anchor="middle" font-family="-apple-system, system-ui, sans-serif" font-size="64" font-weight="800" letter-spacing="2" fill="#0c3b5c">FLUXO<tspan fill="#3b7fc9">RH</tspan></text>
+    <text x="600" y="680" text-anchor="middle" font-family="-apple-system, system-ui, sans-serif" font-size="22" fill="rgba(12,59,92,0.55)">Sistema de Ponto</text>
+  </svg>
+</template>
+<div id="root"></div>
+
+<script>
+// Brand asset URLs — use bundled blob URLs when available, fall back to file paths
+window.BRAND = {
+  logo:     (window.__resources && window.__resources.brandLogo)     || 'assets/fluxorh-logo.png',
+  logoDark: (window.__resources && window.__resources.brandLogoDark) || 'assets/fluxorh-logo-dark.png',
+  mark:     (window.__resources && window.__resources.brandMark)     || 'assets/fluxorh-mark.png',
+  markDark: (window.__resources && window.__resources.brandMarkDark) || 'assets/fluxorh-mark-dark.png',
+};
+</script>
+<script type="module" src="/src/main.jsx"></script>
+</body>
+</html>
