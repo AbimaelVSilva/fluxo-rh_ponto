@@ -37,7 +37,7 @@ const EMPLOYEES = [
   makeEmployeeRow('Gabriela Pinto', '1053', 'Analista Financeiro', 'Administrativo', '+02h00'),
   makeEmployeeRow('Hugo Cavalcante', '1061', 'Operador de Empilhadeira', 'Operação', '+06h45'),
   makeEmployeeRow('Isabela Tavares', '1064', 'Assistente Comercial', 'Comercial', '-01h10'),
-  makeEmployeeRow('João Silva', '1023', 'Auxiliar de Operações', 'Operação', '+02h30'),
+  makeEmployeeRow('NÉLIO LIMA', '1023', 'Auxiliar de Operações', 'Operação', '+02h30'),
   makeEmployeeRow('Karina Vasconcelos', '1071', 'Estoquista', 'Logística', '+00h15'),
   makeEmployeeRow('Lucas Pereira', '1075', 'Conferente', 'Logística', '+03h25'),
   makeEmployeeRow('Mariana Costa', '1080', 'Recepcionista', 'Administrativo', '-00h30'),
@@ -791,7 +791,7 @@ function MonthlyGrid({ onCellClick, selected }) {
           <tbody>
             {EMPLOYEES.map((emp, ei) => {
               const sum = empSummary(ei);
-              const isHighlight = emp.name === 'João Silva';
+              const isHighlight = emp.name === 'NÉLIO LIMA';
               return (
                 <tr key={ei}>
                   {/* Sticky employee column */}
